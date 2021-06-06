@@ -10,7 +10,7 @@ Displays percentage of people vaccinated against COVID-19 for a given country in
 5. Open the plugin in a text editor and change the `COUNTRY` to a two- or three-letter country code.
 6. Refresh BitBar via its built-in menu. If everything is set up correctly, you should briefly see a **…** icon, and then the number of people vaccinated against COVID-19.
 
-![COVID-19 Vax plugin sample](https://user-images.githubusercontent.com/43363630/93694795-da7d0700-fb4a-11ea-875b-02f29152e929.png)
+![COVID-19 Vax plugin sample](https://user-images.githubusercontent.com/43363630/120919718-01d62d00-c6f6-11eb-902a-45edddcda334.png)
 
 ## Attributions
 In addition to the projects mentioned above, this plugin owes great thanks to the original upon which it is heavily based, [covid-bitbar](https://github.com/wilsongoode/covid-bitbar) by Wilson Goode.
