@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # <bitbar.title>COVID-19 Vaccinations</bitbar.title>
-# <bitbar.version>v1.0.0</bitbar.version>
+# <bitbar.version>v1.1.0</bitbar.version>
 # <bitbar.author>CartoonChess</bitbar.author>
 # <bitbar.author.github>cartoonchess</bitbar.author.github>
 # <bitbar.desc>Displays percentage of people vaccinated against COVID-19 for a given country.</bitbar.desc>
@@ -13,7 +13,7 @@
 # The country must be a two- or three-letter country code.
 COUNTRY="kr"
 # Show the number of fully vaccinated people, otherwise anyone with at least one shot.
-SHOW_FULLY_VACCINATED=true
+SHOW_FULLY_VACCINATED=false
 # Include emoji in menu bar.
 USE_EMOJI=true
 # ===========================================================================
@@ -73,11 +73,20 @@ fi
 
 # Methods
 
+# Return number with comma as thousands place separator
+# Usage:
+# BIG_NUM=1500
+# echo "I have $(commas $BIG_NUM) bees"
+# Output: I have 1,500 bees
+commas() {
+    echo $(awk 'BEGIN{printf "%\047d\n", '$1'}')
+}
+
 # Round a number to the nearest integer
 # Usage:
-# COUNT=15
-# echo "I have $COUNT $(plural $COUNT 'bee' 'bees')"
-# Output: I have 15 bees
+# SCORE=73.4
+# echo "I scored approximately $(round $SCORE) on the test"
+# Output: I scored approximately 73 on the test"
 round() {
     NUMBER=$1
     echo $NUMBER | awk '{print int($1+0.5)}'
@@ -136,6 +145,20 @@ FULLY_VACCINATED_PERCENT=$(echo $VACCINATIONS_DATA |
     '.[] | select(.iso_code == $country_code) | .data |
     .[-1].people_fully_vaccinated_per_hundred'
     )
+
+VACCINATIONS_TODAY=$(echo $VACCINATIONS_DATA |
+    jq --arg country_code $COUNTRY_CODE \
+    '.[] | select(.iso_code == $country_code) | .data |
+    .[-1].daily_vaccinations'
+    )
+
+MOST_RECENT_DATE=$(echo $VACCINATIONS_DATA |
+    jq --arg country_code $COUNTRY_CODE \
+    '.[] | select(.iso_code == $country_code) | .data |
+    .[-1].date' |
+    sed -E 's/"//g'
+    )
+
    
    
     
@@ -165,6 +188,11 @@ echo "$VACCINATED_PERCENT% of people vaccinated in $COUNTRY_NAME | href=https://
 # Fully vaccinated
 echo "$FULLY_VACCINATED_PERCENT% of people fully vaccinated in $COUNTRY_NAME | href=https://ourworldindata.org/explorers/coronavirus-data-explorer?Metric=People+fully+vaccinated&Relative+to+Population=true&country=$COUNTRY_CODE"
 
+# Today's stats
+VACCINATIONS_TODAY_FORMATTED=$(commas $VACCINATIONS_TODAY)
+# Mac-specific formatting; Linux would require a change
+DATE_FORMATTED=$(date -j -f "%Y-%m-%d" $MOST_RECENT_DATE +"%B %-d")
+echo "$VACCINATIONS_TODAY_FORMATTED vaccinations newly administered on $DATE_FORMATTED"
 
 
 # Options
