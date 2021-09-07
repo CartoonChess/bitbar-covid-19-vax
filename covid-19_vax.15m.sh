@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # <bitbar.title>COVID-19 Vaccinations</bitbar.title>
-# <bitbar.version>v1.1.0</bitbar.version>
+# <bitbar.version>v1.2.0</bitbar.version>
 # <bitbar.author>CartoonChess</bitbar.author>
 # <bitbar.author.github>cartoonchess</bitbar.author.github>
 # <bitbar.desc>Displays percentage of people vaccinated against COVID-19 for a given country.</bitbar.desc>
@@ -12,8 +12,10 @@
 # ==============================CONFIGURATION================================
 # The country must be a two- or three-letter country code.
 COUNTRY="kr"
-# Show the number of fully vaccinated people, otherwise anyone with at least one shot.
-SHOW_FULLY_VACCINATED=false
+# Choose which statistic(s) to show on the menu bar.
+# Setting both to false will display an average of the two.
+SHOW_FULLY_VACCINATED=true
+SHOW_PARTIALLY_VACCINATED=false
 # Include emoji in menu bar.
 USE_EMOJI=true
 # ===========================================================================
@@ -149,7 +151,7 @@ FULLY_VACCINATED_PERCENT=$(echo $VACCINATIONS_DATA |
 VACCINATIONS_TODAY=$(echo $VACCINATIONS_DATA |
     jq --arg country_code $COUNTRY_CODE \
     '.[] | select(.iso_code == $country_code) | .data |
-    .[-1].daily_vaccinations'
+    .[-1].daily_vaccinations_raw'
     )
 
 MOST_RECENT_DATE=$(echo $VACCINATIONS_DATA |
@@ -165,10 +167,15 @@ MOST_RECENT_DATE=$(echo $VACCINATIONS_DATA |
 # Show menu bar item
 
 # Choose main data point and round percentage
-if [ $SHOW_FULLY_VACCINATED = true ]; then
+if [ $SHOW_PARTIALLY_VACCINATED = true ] && [ $SHOW_FULLY_VACCINATED = true ]; then
+    ICON="$(round $FULLY_VACCINATED_PERCENT)%•$(round $VACCINATED_PERCENT)"
+elif [ $SHOW_FULLY_VACCINATED = true ]; then
     ICON=$(round $FULLY_VACCINATED_PERCENT)
-else
+elif [ $SHOW_PARTIALLY_VACCINATED = true ]; then
     ICON=$(round $VACCINATED_PERCENT)
+else
+    # Round first because bash division only works on integers, really.
+    ICON=$((($(round $VACCINATED_PERCENT) + $(round $FULLY_VACCINATED_PERCENT)) / 2))
 fi
 
 if [ $USE_EMOJI = true ]; then
